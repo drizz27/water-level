@@ -1,0 +1,327 @@
+import 'package:flutter/material.dart';
+import 'package:fl_chart/fl_chart.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: MainScreen(),
+    );
+  }
+}
+
+class MainScreen extends StatefulWidget {
+  const MainScreen({super.key});
+
+  @override
+  State<MainScreen> createState() => _MainScreenState();
+}
+
+class _MainScreenState extends State<MainScreen> {
+  int _selectedIndex = 0;
+
+  final List<Widget> _pages = [
+    const HomePage(),
+    const UserManagementPage(),
+    Center(child: Text("Notifications Page")), // Placeholder
+    Center(child: Text("Profile Page")),       // Placeholder
+  ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  BottomNavigationBarItem buildNavItem(IconData icon) {
+    return BottomNavigationBarItem(
+      icon: CircleAvatar(
+        backgroundColor: Colors.grey[300],
+        child: Icon(icon, color: Colors.black),
+      ),
+      label: '',
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: _pages[_selectedIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        type: BottomNavigationBarType.fixed,
+        items: [
+          buildNavItem(Icons.home),
+          buildNavItem(Icons.add_box_outlined),
+          buildNavItem(Icons.notifications_none),
+          buildNavItem(Icons.person),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------- HOME PAGE ----------
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 16),
+            Row(
+              children: const [
+                Icon(Icons.sensors, size: 40),
+                SizedBox(width: 8),
+                Text(
+                  'Barangay Bridge Water Level',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: const [
+                Text(
+                  'Current Water Level',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  'WARNING',
+                  style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Container(
+              height: 200,
+              padding: const EdgeInsets.all(8),
+              child: LineChart(
+                LineChartData(
+                  minY: 0,
+                  maxY: 10,
+                  titlesData: FlTitlesData(
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: 32,
+                        getTitlesWidget: (value, _) =>
+                            Text("${value.toInt() + 1}:17 PM", style: const TextStyle(fontSize: 10)),
+                        interval: 1,
+                      ),
+                    ),
+                    leftTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        getTitlesWidget: (value, _) =>
+                            Text("${value.toInt()}m", style: const TextStyle(fontSize: 10)),
+                        interval: 1,
+                        reservedSize: 32,
+                      ),
+                    ),
+                    rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  ),
+                  gridData: FlGridData(show: true),
+                  borderData: FlBorderData(show: true),
+                  lineBarsData: [
+                    LineChartBarData(
+                      isCurved: true,
+                      color: Colors.blue,
+                      barWidth: 3,
+                      spots: const [
+                        FlSpot(0, 3),
+                        FlSpot(1, 3.5),
+                        FlSpot(2, 4),
+                        FlSpot(3, 4.8),
+                        FlSpot(4, 5.2),
+                      ],
+                      belowBarData: BarAreaData(
+                        show: true,
+                        color: Colors.blue.withOpacity(0.2),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: const [
+                InfoCard(label: "Last Update", value: "1 hr ago"),
+                InfoCard(label: "Change Rate", value: "+0.3m/hr"),
+                InfoCard(label: "Sensor Status", value: "Online", color: Colors.green),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class InfoCard extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color? color;
+
+  const InfoCard({super.key, required this.label, required this.value, this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(label, style: const TextStyle(fontSize: 12)),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+            color: color ?? Colors.black,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ---------- CONTACT PAGE (USER MANAGEMENT) ----------
+class UserManagementPage extends StatelessWidget {
+  const UserManagementPage({super.key});
+
+  final List<Map<String, String>> users = const [
+    {"name": "Juan dela Cruz", "email": "admin@gmail.com"},
+    {"name": "Maria Santos", "email": "official@gmail.com"},
+    {"name": "Pedro Reyes", "email": "resident@gmail.com"},
+    {"name": "Ramon Bautista", "email": "official@gmail.com"},
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Row(
+                children: [
+                  Icon(Icons.water, size: 32),
+                  SizedBox(width: 10),
+                  Text(
+                    "Barangay Bridge Water Level",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: TextField(
+                decoration: InputDecoration(
+                  hintText: "Search",
+                  prefixIcon: const Icon(Icons.search),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(25.0),
+                    borderSide: BorderSide.none,
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey[200],
+                ),
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Card(
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("System Users", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                                SizedBox(height: 4),
+                                Text("Manage users accounts and permissions"),
+                              ],
+                            ),
+                            ElevatedButton(
+                              onPressed: () {},
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.black,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              ),
+                              child: const Text("+ Add User"),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        Expanded(
+                          child: ListView.separated(
+                            itemCount: users.length,
+                            separatorBuilder: (context, index) => const Divider(),
+                            itemBuilder: (context, index) {
+                              return ListTile(
+                                leading: const CircleAvatar(child: Icon(Icons.person)),
+                                title: Text(users[index]['name']!),
+                                subtitle: Text(users[index]['email']!),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(icon: const Icon(Icons.edit), onPressed: () {}),
+                                    IconButton(icon: const Icon(Icons.delete), onPressed: () {}),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text("Showing 1 to 4 of 9 users"),
+                            Row(
+                              children: [
+                                IconButton(onPressed: () {}, icon: const Icon(Icons.arrow_back_ios)),
+                                IconButton(onPressed: () {}, icon: const Icon(Icons.arrow_forward_ios)),
+                              ],
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
